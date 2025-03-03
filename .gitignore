@@ -1,0 +1,8 @@
+.idea/.gitignore
+.idea/misc.xml
+.idea/Testez-une-application-full-stack.iml
+.idea/modules.xml
+tests/.idea/misc.xml
+tests/.idea/workspace.xml
+.idea/vcs.xml
+front/package-lock.json
