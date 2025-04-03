@@ -4,7 +4,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { expect } from '@jest/globals';
 import { SessionApiService } from '../../services/session-api.service'; 
-import { OnInit } from '@angular/core';
 
 import { ListComponent } from './list.component';
 import { Session } from '../../interfaces/session.interface';
