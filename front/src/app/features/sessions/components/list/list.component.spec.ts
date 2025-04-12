@@ -3,14 +3,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { expect } from '@jest/globals';
-import { SessionApiService } from '../../services/session-api.service'; 
+import { provideRouter, RouterLink } from '@angular/router';
+import { SessionApiService } from '../../services/session-api.service';
 
 import { ListComponent } from './list.component';
 import { Session } from '../../interfaces/session.interface';
 import { of } from 'rxjs';
+import { SessionService } from 'src/app/services/session.service';
 
 
-const mockSessions: Session[] = [
+const mockApiSessions: Session[] = [
   {
     id: 1,
     name: 'Yoga Flow',
@@ -33,50 +35,67 @@ const mockSessions: Session[] = [
   }
 ];
 
+
 describe('ListComponent', () => {
   let component: ListComponent;
   let fixture: ComponentFixture<ListComponent>;
-  let mockSessionService: jest.Mocked<SessionApiService>;
+  let mockSessionApiService: { all: jest.Mock };
+  let mockSessionService = {
+    sessionInformation: {
+      token: 'jwt-token-mock',
+      type: 'type',
+      id: 1,
+      username: 'username@email.com',
+      firstName: 'firstname',
+      lastName: 'lastname',
+      admin: false
+    },
+    $isLogged: jest.fn().mockReturnValue(of(true))
+  }
 
+  
   beforeEach(async () => {
-    const sessionServiceMock = {
-      findAll: jest.fn()
-    };
-    
+    mockSessionApiService = {
+      all: jest.fn()
+    }
+
     await TestBed.configureTestingModule({
       declarations: [ListComponent],
-      imports: [HttpClientModule, MatCardModule, MatIconModule],
-      providers: [{ provide: SessionApiService, useValue: sessionServiceMock }]
+      imports: [HttpClientModule, MatCardModule, MatIconModule, RouterLink],
+      providers: [
+        { provide: SessionApiService, useValue: mockSessionApiService },
+        { provide: SessionService, useValue: mockSessionService },
+        provideRouter([])
+      ]
     }).compileComponents();
 
-    mockSessionService = TestBed.inject(SessionApiService) as jest.Mocked<SessionApiService>;
     fixture = TestBed.createComponent(ListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  beforeEach(() => {
-    mockSessionService.all.mockReturnValue(of(mockSessions));
-  })
-
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
- it('Should get all sessions', () => {
+  it('Should get all sessions', () => {
+    mockSessionApiService.all.mockReturnValue(of(mockApiSessions));
+    fixture = TestBed.createComponent(ListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    
     component.sessions$.subscribe(sessions => {
-      expect(sessions).toEqual(mockSessions);
+      expect(sessions).toEqual(mockApiSessions);
     });
   });
 
-  // test case for empty list
   it('should handle empty session list', () => {
     // Reset mock to return empty array
-    mockSessionService.all.mockReturnValue(of([]));
+    mockSessionApiService.all.mockReturnValue(of([]));
 
-    // Recreate component with new mock
     fixture = TestBed.createComponent(ListComponent);
     component = fixture.componentInstance;
+    
     fixture.detectChanges();
 
     component.sessions$.subscribe(sessions => {
